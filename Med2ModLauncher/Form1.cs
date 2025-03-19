@@ -255,10 +255,44 @@ namespace Med2ModLauncher
 
                 string selectedMod = ((ListViewItem)current).Text;
 
+                string modFolder = 
+                med2Root + Path.DirectorySeparatorChar
+                 + "mods" + Path.DirectorySeparatorChar 
+                 + selectedMod
+                 + Path.DirectorySeparatorChar;
+
+                string eopV2exe = 
+                 modFolder
+                 + Path.DirectorySeparatorChar
+                 + "M2TWEOP_GUI.exe";
+
+                string eopV1exe = 
+                 modFolder
+                 + Path.DirectorySeparatorChar
+                 + "M2TWEOP.exe";        
+
+                bool eopV2Exists = File.Exists(eopV2exe);
+                bool eopV1Exists = File.Exists(eopV1exe);
+
                 Process process = new Process();
-                process.StartInfo.FileName = med2Root + "\\" + MEDIEVAL_EXE;
-                process.StartInfo.WorkingDirectory = med2Root;
-                process.StartInfo.Arguments = "--features.mod=mods/" + selectedMod + " --io.file_first";
+
+                // If the mod has an EOP V1 (M2TWEOP.exe) or EOP V2(M2TWEOP_GUI.exe), use it
+                if (eopV2Exists)
+                {
+                    process.StartInfo.FileName = eopV2exe;
+                    process.StartInfo.WorkingDirectory = modFolder;
+                }
+                else if (eopV1Exists)
+                {
+                    process.StartInfo.FileName = eopV1exe;
+                    process.StartInfo.WorkingDirectory = modFolder;
+                }
+                else
+                {
+                    process.StartInfo.FileName = med2Root + "\\" + MEDIEVAL_EXE;
+                    process.StartInfo.WorkingDirectory = med2Root;
+                    process.StartInfo.Arguments = "--features.mod=mods/" + selectedMod + " --io.file_first";
+                }
 
                 process.Start();
             }
