@@ -19,6 +19,12 @@ namespace Med2ModLauncher
         };
 
         private static readonly string[] PROGRAM_FILES_FOLDERS = new string[] { "Program Files (x86)", "Program Files" };
+        private static readonly string[] M2TWEOP_EXE_FILES = new string[]
+        {
+            "M2TWEOP_GUI.exe", // V4 (Beta)
+            "M2TWEOP GUI.exe", // V2-V3
+            "M2TWEOP.exe" // v1
+        };
         private static readonly string GAME_STEAM_ROOT = "Steam\\steamapps\\common\\Medieval II Total War";
         private static readonly string MODS_FOLDER = "mods";
         private static readonly string  MEDIEVAL_EXE = "medieval2.exe";
@@ -255,10 +261,34 @@ namespace Med2ModLauncher
 
                 string selectedMod = ((ListViewItem)current).Text;
 
+                string modFolder = 
+                med2Root + Path.DirectorySeparatorChar
+                 + "mods" + Path.DirectorySeparatorChar 
+                 + selectedMod;
+
                 Process process = new Process();
-                process.StartInfo.FileName = med2Root + "\\" + MEDIEVAL_EXE;
-                process.StartInfo.WorkingDirectory = med2Root;
-                process.StartInfo.Arguments = "--features.mod=mods/" + selectedMod + " --io.file_first";
+                bool m2tweopFound = false;
+
+                // If the mod has an EOP exe file, use it.
+                foreach (string m2tweopExe in M2TWEOP_EXE_FILES)
+                {
+                    String fullPathToM2tweopExe = modFolder + Path.DirectorySeparatorChar + m2tweopExe;
+
+                    if (File.Exists(fullPathToM2tweopExe))
+                    {
+                        process.StartInfo.FileName = fullPathToM2tweopExe;
+                        process.StartInfo.WorkingDirectory = modFolder;
+                        m2tweopFound = true;
+                        break;
+                    }
+                }
+
+                if (!m2tweopFound)
+                {
+                    process.StartInfo.FileName = med2Root + Path.DirectorySeparatorChar + MEDIEVAL_EXE;
+                    process.StartInfo.WorkingDirectory = med2Root;
+                    process.StartInfo.Arguments = "--features.mod=mods/" + selectedMod + " --io.file_first";
+                }
 
                 process.Start();
             }
